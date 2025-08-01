@@ -687,6 +687,42 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         --
+        prettier = {
+          -- cmd = { 'prettierd', '--stdio' }, -- Use the prettier daemon
+          filetypes = { 'javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'css', 'scss', 'less', 'html', 'json' },
+          capabilities = {
+            -- Disable formatting for prettier, since we use conform.nvim to format
+            documentFormattingProvider = false,
+            documentRangeFormattingProvider = false,
+          },
+        },
+        ts_ls = {
+          -- cmd = { 'typescript-language-server', '--stdio' }, -- Use the ts_ls daemon
+          filetypes = { 'javascript', 'typescript', 'javascriptreact', 'typescriptreact' },
+          capabilities = {
+            -- Disable formatting for ts_ls, since we use conform.nvim to format
+            documentFormattingProvider = false,
+            documentRangeFormattingProvider = false,
+          },
+        },
+        emmet_language_server = {
+          filetypes = { 'html', 'css', 'javascript', 'typescript', 'javascriptreact', 'typescriptreact' },
+          init_options = {
+            html = {
+              options = {
+                -- Use the default HTML options, but add some extra ones
+                ['bem.enabled'] = true,
+                ['jsx.enabled'] = true,
+              },
+            },
+          },
+        },
+        jsonls = {
+          settings = {
+            validate = { enable = true },
+            format = { enable = true },
+          },
+        },
 
         lua_ls = {
           -- cmd = { ... },
@@ -777,6 +813,9 @@ require('lazy').setup({
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        java = { 'astyle' },
+        perl = { 'perltidy' },
+        html = { 'prettier' },
       },
     },
   },
@@ -948,7 +987,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'json' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {

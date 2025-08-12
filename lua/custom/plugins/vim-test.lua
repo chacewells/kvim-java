@@ -6,11 +6,21 @@ return {
     -- optional: run tests in a floating terminal/buffer instead of blocking Vim:
     vim.g['test#strategy'] = 'neovim'
 
-    -- pick the GradleTest runner (not the default “test” command)
+    -- Java configuration
+    -- pick the GradleTest runner (not the default "test" command)
     vim.g['test#java#runner'] = 'gradletest'
-
-    -- point it at your wrapper (omit the “test” subcommand here!)
+    
+    -- point it at your wrapper (omit the "test" subcommand here!)
     vim.g['test#java#gradletest#executable'] = 'JAVA_HOME=' .. vim.fn.expand '~/.sdkman/candidates/java/17.0.16-amzn' .. ' ./gradlew test'
+
+    -- Python configuration
+    -- Configure pytest as the default Python test runner
+    vim.g['test#python#runner'] = 'pytest'
+    
+    -- You can also configure other Python test runners if needed:
+    -- vim.g['test#python#runner'] = 'unittest'  -- for unittest
+    -- vim.g['test#python#runner'] = 'nose'      -- for nose
+    -- vim.g['test#python#runner'] = 'django'    -- for Django tests
 
     local opts = { silent = true, noremap = true }
 

@@ -1056,5 +1056,99 @@ require('lazy').setup({
   },
 })
 
+-- ========= Cucumber orchestration runner =========
+-- Customize these for your project:
+local GRADLE_TASK = 'docker' -- e.g. "clean build", "testClasses", "yourCustomTask"
+local RUNNER_DIR = 'integrationTests' -- dir (relative to repo root) where the bash runner lives
+local RUNNER_CMD = 'JAVA_HOME=' .. vim.fn.expand '~/.sdkman/candidates/java/17.0.16-amzn' .. ' ./test_runner.sh' -- the bash file to execute
+
+-- Try to find the repo root by locating either .git or gradlew
+local function repo_root()
+  local cwd = vim.fn.getcwd()
+  local root = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git' }, { upward = true, path = cwd })[1] or '')
+  return (root ~= '' and root) or cwd
+end
+
+-- Extract @cucumber_tag under cursor if present
+local function tag_under_cursor()
+  -- First grab the cWORD (so : and - stay); fall back to line match
+  local word = vim.fn.expand '<cWORD>'
+  if word:match '^@[%w:_-]+$' then
+    return word
+  end
+  local line = vim.api.nvim_get_current_line()
+  local col = vim.api.nvim_win_get_cursor(0)[2] + 1
+  -- scan line for nearest @tag that spans the cursor
+  local s, e = 1, 1
+  while true do
+    s, e = line:find('@[%w:_-]+', e)
+    if not s then
+      break
+    end
+    if col >= s and col <= e then
+      return line:sub(s, e)
+    end
+    e = e + 1
+  end
+  return nil
+end
+
+-- Build the one-shot shell command (ensures the order & directories)
+local function build_shell(tag_opt)
+  local root = repo_root()
+  local gradle = 'JAVA_HOME=' .. vim.fn.expand '~/.sdkman/candidates/java/17.0.16-amzn' .. ' ./gradlew ' .. GRADLE_TASK
+
+  local tagArg = (tag_opt and #tag_opt > 0) and (' -t ' .. vim.fn.shellescape(tag_opt)) or ''
+  -- Chain: cd root && gradle && cd runner dir && run script
+  local parts = {
+    'set -euo pipefail',
+    'cd ' .. vim.fn.shellescape(root),
+    gradle,
+    'cd ' .. vim.fn.shellescape(root .. '/' .. RUNNER_DIR),
+    RUNNER_CMD .. tagArg,
+  }
+  return 'bash -lc ' .. vim.fn.shellescape(table.concat(parts, ' && '))
+end
+
+-- Open a bottom terminal and run the command
+local function run_in_terminal(cmd)
+  -- 15-line split; reuse buffer if you'd like by changing below
+  vim.cmd 'botright 15split | enew'
+  vim.bo.buftype = 'nofile'
+  vim.bo.bufhidden = 'wipe'
+  vim.cmd('terminal ' .. cmd)
+  -- Enter terminal mode automatically
+  vim.cmd 'startinsert'
+end
+
+-- Main entry: :CukeRun[!]
+local function run_cukes(force_prompt)
+  local tag = nil
+  if force_prompt then
+    vim.ui.input({ prompt = 'Cucumber tag (e.g. @smoke), leave blank for none: ' }, function(input)
+      tag = (input and input:match '%S') and input or nil
+      run_in_terminal(build_shell(tag))
+    end)
+  else
+    tag = tag_under_cursor()
+    run_in_terminal(build_shell(tag))
+  end
+end
+
+-- User command: :CukeRun (auto-picks tag under cursor), :CukeRun! (prompt)
+vim.api.nvim_create_user_command('CukeRun', function(opts)
+  run_cukes(opts.bang)
+end, { bang = true, desc = 'Run Gradle then cucumber runner (uses @tag under cursor if present). Use ! to prompt.' })
+
+-- Keymap: <leader>ct to run (no prompt, uses tag under cursor if present)
+vim.keymap.set('n', '<leader>ct', function()
+  run_cukes(false)
+end, { desc = 'CukeRun: Gradle + runner' })
+-- Optional: <leader>cT to force prompt
+vim.keymap.set('n', '<leader>cT', function()
+  run_cukes(true)
+end, { desc = 'CukeRun: prompt tag' })
+-- ========= end =========
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

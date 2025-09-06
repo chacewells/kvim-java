@@ -430,6 +430,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
+      vim.keymap.set('n', '<leader>so', builtin.buffers, { desc = '[S]earch [O]pen Buffers' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sW', builtin.lsp_dynamic_workspace_symbols, { desc = '[S]earch Dynamic [W]workspace Symbols' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
@@ -463,6 +464,20 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
+
+      -- helper to get visual selection
+      local function get_visual_selection()
+        vim.cmd 'noau normal! "vy"' -- yank selected text into v register
+        local text = vim.fn.getreg 'v' -- get the register content
+        vim.fn.setreg('v', {}) -- clear it
+        return text
+      end
+      vim.keymap.set('v', '<leader>sv', function()
+        local text = get_visual_selection()
+        require('telescope.builtin').grep_string {
+          search = text,
+        }
+      end, { noremap = true, silent = true, desc = '[S]earch [V]isual Selection' })
     end,
   },
 

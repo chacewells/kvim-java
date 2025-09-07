@@ -1,4 +1,4 @@
--- lua/plugins/codecompanion.lua
+-- filepath: /Users/awells10/.config/kickstart.nvim/lua/custom/plugins/codecompanion.lua
 return {
   'olimorris/codecompanion.nvim',
   dependencies = {
@@ -6,35 +6,34 @@ return {
     'nvim-treesitter/nvim-treesitter',
   },
   config = function()
-    local cc = require 'codecompanion'
+    local ok, cc = pcall(require, 'codecompanion')
+    if not ok then
+      vim.notify('Failed to load CodeCompanion: ' .. cc, vim.log.levels.ERROR)
+      return
+    end
 
     cc.setup {
       adapters = {
-        -- Use the Copilot adapter
-        copilot = function()
-          -- Minimal: use defaults and pick a model below
-          return require('codecompanion.adapters').extend('copilot', {
-            -- Set a default model you have access to via Copilot/GitHub Models
-            -- (Examples that commonly work: "gpt-4o-mini", "gpt-4o", "o3-mini")
-            schema = { model = { default = 'gpt-4o-mini' } },
-          })
-        end,
+        http = {
+          -- Use the Copilot adapter
+          copilot = function()
+            return require('codecompanion.adapters').extend('copilot', {
+              schema = { model = { default = 'gpt-4o-mini' } },
+            })
+          end,
+        },
       },
 
-      -- Point the features at Copilot
       strategies = {
         chat = { adapter = 'copilot' },
         inline = { adapter = 'copilot' },
         agent = { adapter = 'copilot' },
       },
 
-      -- Good defaults for a “diff-first” flow
       system_prompt = 'Be concise. Propose unified diffs for multi-file edits.',
       opts = {
         send_code = true, -- include current buffer when asking for changes
       },
-
-      -- Optional: simple “tools” the agent can call (ripgrep, tests, etc.)
       tools = {
         grep = {
           command = 'rg',

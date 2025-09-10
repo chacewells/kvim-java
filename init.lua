@@ -186,6 +186,7 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 
 -- Start new terminal session
 vim.keymap.set('n', '<leader>tt', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (vsplit)' })
+vim.keymap.set('n', '<leader>t.', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer)' })
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -696,6 +697,9 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         pyright = {},
+        -- lombok configured via JDTLS_JVM_ARGS in ~/.zshrc
+        -- e.g. export JDTLS_JVM_ARGS="-javaagent:$HOME/.local/share/nvim/mason/packages/jdtls/lombok.jar"
+        jdtls = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --

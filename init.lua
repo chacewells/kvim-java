@@ -186,7 +186,7 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 
 -- Start new terminal session
 vim.keymap.set('n', '<leader>tt', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (vsplit)' })
-vim.keymap.set('n', '<leader>t.', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer)' })
+vim.keymap.set('n', '<leader>t.', '<:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer)' })
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')

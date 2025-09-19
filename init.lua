@@ -697,9 +697,8 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         pyright = {},
-        -- lombok configured via JDTLS_JVM_ARGS in ~/.zshrc
-        -- e.g. export JDTLS_JVM_ARGS="-javaagent:$HOME/.local/share/nvim/mason/packages/jdtls/lombok.jar"
-        jdtls = {},
+        -- Note: Java LSP (jdtls) is now handled by nvim-java plugin
+        -- See lua/custom/plugins/nvim-java.lua for Java configuration
         terraformls = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs

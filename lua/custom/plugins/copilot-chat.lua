@@ -13,9 +13,16 @@ return {
     },
     build = 'make tiktoken',
     config = function()
-      require('CopilotChat').setup({
+      require('CopilotChat').setup {
         debug = true, -- Enable debugging for troubleshooting
-      })
+        window = {
+          layout = 'float', -- Use floating window
+          -- Optional: customize size and border
+          width = 0.6, -- 60% of editor width
+          height = 0.7, -- 70% of editor height
+          border = 'rounded',
+        },
+      }
     end,
   },
 }

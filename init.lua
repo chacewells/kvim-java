@@ -706,12 +706,11 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      -- Note: Java LSP (jdtls) is now handled by an autocmd in `after/ftplugin/java.lua`
       local servers = {
         -- clangd = {},
         -- gopls = {},
         pyright = {},
-        -- Note: Java LSP (jdtls) is now handled by nvim-java plugin
-        -- See lua/custom/plugins/nvim-java.lua for Java configuration
         terraformls = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -834,7 +833,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = true, cpp = true, java = true }
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -848,7 +847,6 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         python = { 'isort', 'black' },
-        --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         perl = { 'perltidy' },
@@ -1186,6 +1184,13 @@ vim.keymap.set('n', '<leader>cT', function()
   run_cukes(true)
 end, { desc = 'CukeRun: prompt tag' })
 -- ========= end =========
+
+-- ========== Gradle spotlessApply =========
+vim.api.nvim_create_user_command('SpotlessApply', function()
+  vim.cmd '!./gradlew spotlessApply'
+  vim.cmd 'checktime'
+end, {})
+-- ========== end ==========
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

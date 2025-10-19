@@ -4,7 +4,7 @@ function M:setup()
   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
   local workspace_dir = vim.fn.stdpath 'data' .. '/workspaces/' .. project_name -- todo get workspace data directory
   local java = vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem/bin/java'
-  local lombok = vim.fn.stdpath 'user' .. '/mason/packages/jdtls/lombok.jar'
+  local lombok = vim.fn.stdpath 'data' .. '/mason/packages/jdtls/lombok.jar'
   local config = {
     cmd = {
       java, -- path to java 21
@@ -23,10 +23,10 @@ function M:setup()
       '-javaagent:' .. lombok,
       -- point to eclipse.jdt.ls launcher jar
       '-jar',
-      vim.fn.stdpath 'data' .. '/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.7.0.v20250519-0528.jar',
+      '/Users/awells10/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.7.0.v20250519-0528.jar',
       '-configuration',
       -- eclipse.jdt.ls configuration dir (likely mac_arm or something)
-      vim.fn.stdpath 'data' .. '/mason/packages/jdtls/config_mac_arm',
+      '/Users/awells10/.local/share/nvim/mason/packages/jdtls/config_mac_arm',
       '-data',
       workspace_dir,
     },

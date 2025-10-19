@@ -3,6 +3,8 @@ vim.opt_local.tabstop = 4
 vim.opt_local.shiftwidth = 4
 vim.opt_local.softtabstop = 4
 vim.opt_local.expandtab = true -- use spaces instead of tabs
+vim.opt_local.formatoptions:remove 't'
+vim.opt_local.formatoptions:remove 'c'
 
 -- Simple run keymap for standalone Java files (nvim-java handles project files)
 -- vim.keymap.set('n', '<leader>r', ':!javac % && java %:r<CR>', { buffer = true, desc = '[R]un Java file' })

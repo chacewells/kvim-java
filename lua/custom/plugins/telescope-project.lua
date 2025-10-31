@@ -9,6 +9,7 @@ return {
     local base_dirs = {
       '~/IdeaProjects', -- scan all repos here
       '~/dev', -- scan all repos here
+      '~/tmp', -- scan all repos here
       '~/.config', -- scan all repos here
     }
     -- Filter out non-existent directories

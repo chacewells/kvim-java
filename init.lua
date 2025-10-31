@@ -852,6 +852,7 @@ require('lazy').setup({
         perl = { 'perltidy' },
         html = { 'prettier' },
         markdown = { 'prettier' },
+        sql = { 'sql_formatter' },
       },
     },
   },
@@ -1190,6 +1191,27 @@ vim.api.nvim_create_user_command('SpotlessApply', function()
   vim.cmd '!./gradlew spotlessApply'
   vim.cmd 'checktime'
 end, {})
+-- ========== end ==========
+
+-- ========== Git Exclude Command ==========
+vim.api.nvim_create_user_command('GitExclude', function()
+  local root = repo_root() -- reuse the existing repo_root function
+  local exclude_path = root .. '/.git/info/exclude'
+
+  -- Check if .git directory exists
+  if vim.fn.isdirectory(root .. '/.git') == 0 then
+    vim.notify('Not in a git repository', vim.log.levels.ERROR)
+    return
+  end
+
+  -- Create the exclude file if it doesn't exist
+  if vim.fn.filereadable(exclude_path) == 0 then
+    vim.fn.writefile({}, exclude_path)
+  end
+
+  -- Open the exclude file
+  vim.cmd('edit ' .. vim.fn.fnameescape(exclude_path))
+end, { desc = 'Open .git/info/exclude file for editing' })
 -- ========== end ==========
 
 -- The line beneath this is called `modeline`. See `:help modeline`

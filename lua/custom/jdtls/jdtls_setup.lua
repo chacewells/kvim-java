@@ -45,6 +45,15 @@ function M:setup()
               name = 'JavaSE-17',
               path = '/Users/awells10/.sdkman/candidates/java/17.0.12-tem',
             },
+            {
+              name = 'JavaSE-11',
+              path = '/Users/awells10/.sdkman/candidates/java/11.0.29-tem',
+            },
+          },
+          project = {
+            referencedLibraries = {
+              'build/*/java/main',
+            },
           },
         },
       },

@@ -844,14 +844,15 @@ require('lazy').setup({
         end
       end,
       formatters_by_ft = {
-        lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        python = { 'isort', 'black' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
+        graphql = { 'prettierd' },
+        html = { 'prettierd' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        lua = { 'stylua' },
+        markdown = { 'prettierd' },
         perl = { 'perltidy' },
-        html = { 'prettier' },
-        markdown = { 'prettier' },
+        python = { 'isort', 'black' },
         sql = { 'sql_formatter' },
       },
     },
@@ -1193,6 +1194,20 @@ vim.api.nvim_create_user_command('SpotlessApply', function()
 end, {})
 -- ========== end ==========
 
+-- ========== Gradle GenerateJava =========
+vim.api.nvim_create_user_command('GenerateJava', function()
+  vim.cmd '!./gradlew generateJava'
+  vim.cmd 'checktime'
+end, {})
+-- ========== end ==========
+
+-- ========== Gradle CompileJava =========
+vim.api.nvim_create_user_command('CompileJava', function()
+  vim.cmd '!./gradlew compileJava'
+  vim.cmd 'checktime'
+end, {})
+-- ========== end ==========
+
 -- ========== Git Exclude Command ==========
 vim.api.nvim_create_user_command('GitExclude', function()
   local root = repo_root() -- reuse the existing repo_root function
@@ -1212,6 +1227,26 @@ vim.api.nvim_create_user_command('GitExclude', function()
   -- Open the exclude file
   vim.cmd('edit ' .. vim.fn.fnameescape(exclude_path))
 end, { desc = 'Open .git/info/exclude file for editing' })
+-- ========== end ==========
+--
+-- ========== Open in GitHub ==========
+vim.api.nvim_create_user_command('OpenInGitHub', function()
+  local filepath = vim.fn.expand '%:p'
+  local root = repo_root()
+  local relpath = filepath:sub(#root + 2)
+  local line = vim.fn.line '.'
+  local remote_url = vim.fn.systemlist('git -C ' .. root .. ' remote get-url origin')[1] or ''
+  if remote_url == '' then
+    vim.notify('No git remote found', vim.log.levels.ERROR)
+    return
+  end
+  -- Convert git@github.com:owner/repo.git or https://github.com/owner/repo.git to https://github.com/owner/repo
+  local github_url = remote_url:gsub('^git@github.com:', 'https://github.com/'):gsub('%.git$', ''):gsub('^https://github.com/', 'https://github.com/')
+  -- Get current branch
+  local branch = vim.fn.systemlist('git -C ' .. root .. ' rev-parse --abbrev-ref HEAD')[1] or 'main'
+  local url = string.format('%s/blob/%s/%s#L%d', github_url, branch, relpath, line)
+  vim.fn.system { 'open', url }
+end, { desc = 'Open current file/line in GitHub' })
 -- ========== end ==========
 
 -- The line beneath this is called `modeline`. See `:help modeline`

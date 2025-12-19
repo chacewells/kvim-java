@@ -5,6 +5,7 @@ function M:setup()
   local workspace_dir = vim.fn.stdpath 'data' .. '/workspaces/' .. project_name -- todo get workspace data directory
   local java = vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem/bin/java'
   local lombok = vim.fn.stdpath 'data' .. '/mason/packages/jdtls/lombok.jar'
+  -- local gradle_java_home = project_name == 'order-a' and '/Users/awells10/.sdkman/candidates/java/11.0.29-tem' or nil
   local config = {
     cmd = {
       java, -- path to java 21
@@ -50,10 +51,38 @@ function M:setup()
               path = '/Users/awells10/.sdkman/candidates/java/11.0.29-tem',
             },
           },
-          project = {
-            referencedLibraries = {
-              'build/*/java/main',
+        },
+        -- Import Gradle projects and use Gradle as build tool
+        import = {
+          gradle = {
+            enabled = true,
+            wrapper = {
+              enabled = true,
             },
+            version = nil, -- use wrapper version
+            home = nil, -- use wrapper
+            java = {
+              home = nil,
+            },
+            -- Let Gradle handle annotation processing and code generation
+            annotationProcessing = {
+              enabled = true,
+            },
+            -- Use Gradle's output directories
+            jvmArguments = '',
+            -- Automatically sync when build files change
+            offline = false,
+          },
+        },
+        -- Delegate builds to Gradle
+        autobuild = {
+          enabled = false, -- disable jdtls automatic builds
+        },
+        -- Use Gradle-generated sources
+        sources = {
+          organizeImports = {
+            starThreshold = 9999,
+            staticStarThreshold = 9999,
           },
         },
       },

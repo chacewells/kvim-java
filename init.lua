@@ -188,8 +188,15 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- Start new terminal session
-vim.keymap.set('n', '<leader>tt', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (vsplit)' })
-vim.keymap.set('n', '<leader>t.', '<:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer)' })
+vim.keymap.set('n', '<leader>ttv', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session in [v]split' })
+vim.keymap.set('n', '<leader>tt.', '<:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer [.] meaning here)' })
+vim.keymap.set('n', '<leader>ttc', '<C-w>v:terminal cursor-agent<CR>', { noremap = true, desc = 'New [T]erminal Session in vsplit running [c]ursor-agent' })
+
+-- Tab navigation
+vim.keymap.set('n', '<leader>to', ':tabnew<CR>', { desc = 'Open [T]ab in [O]wner window' })
+vim.keymap.set('n', '<leader>tx', ':tabclose<CR>', { desc = 'Close [T]ab in e[X]it' })
+vim.keymap.set('n', '<leader>t]', ':tabnext<CR>', { desc = 'Go to [T]ab [N]ext' })
+vim.keymap.set('n', '<leader>t[', ':tabprev<CR>', { desc = 'Go to [T]ab [P]revious' })
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -255,6 +262,8 @@ rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  'sindrets/diffview.nvim', -- Git diff viewer and more
+  'tpope/vim-fugitive', -- Git commands in nvim
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -854,6 +863,10 @@ require('lazy').setup({
         perl = { 'perltidy' },
         python = { 'isort', 'black' },
         sql = { 'sql_formatter' },
+        -- shell
+        sh = { 'shfmt' },
+        bash = { 'shfmt' },
+        zsh = { 'shfmt' },
       },
     },
   },
@@ -1025,7 +1038,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'json' },
+      ensure_installed = { 'perl', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'json' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {

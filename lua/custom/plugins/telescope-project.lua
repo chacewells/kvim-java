@@ -30,7 +30,7 @@ return {
           hidden_files = true, -- include dotfiles?
           order_by = 'recent', -- sort by last-used
           sync_with_nvim_tree = true, -- keep nvim-tree in sync
-          cd_scope = { 'global' },
+          cd_scope = { 'tab' },
           -- on_project_selected = function(prompt_bufnr)
           --     -- this will :cd into the project root
           --     project_actions.change_working_directory(prompt_bufnr, false)

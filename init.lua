@@ -190,7 +190,13 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- Start new terminal session
 vim.keymap.set('n', '<leader>ttv', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session in [v]split' })
 vim.keymap.set('n', '<leader>tt.', '<:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer [.] meaning here)' })
-vim.keymap.set('n', '<leader>ttc', '<C-w>v:terminal cursor-agent<CR>', { noremap = true, desc = 'New [T]erminal Session in vsplit running [c]ursor-agent' })
+vim.keymap.set('n', '<leader>tcv', '<C-w>v:terminal cursor-agent<CR>', { noremap = true, desc = 'New [T]erminal Session in vsplit running [c]ursor-agent' })
+vim.keymap.set(
+  'n',
+  '<leader>tc.',
+  '<:terminal cursor-agent<CR>',
+  { noremap = true, desc = 'New [T]erminal Session running [c]ursor-agent (current buffer [.] meaning here)' }
+)
 
 -- Tab navigation
 vim.keymap.set('n', '<leader>to', ':tabnew<CR>', { desc = 'Open [T]ab in [O]wner window' })
@@ -433,7 +439,7 @@ require('lazy').setup({
             '--column',
             '--smart-case',
             '--no-ignore',
-            '--hidden',
+            -- '--hidden',
           },
           --   mappings = {
           --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
@@ -441,8 +447,8 @@ require('lazy').setup({
         },
         pickers = {
           find_files = {
-            hidden = true,
-            no_ignore = true,
+            hidden = false,
+            no_ignore = false,
           },
         },
         extensions = {
@@ -1126,7 +1132,7 @@ require('lazy').setup({
 -- Customize these for your project:
 local GRADLE_TASK = 'docker' -- e.g. "clean build", "testClasses", "yourCustomTask"
 local RUNNER_DIR = 'integrationTests' -- dir (relative to repo root) where the bash runner lives
-local RUNNER_CMD = 'JAVA_HOME=' .. vim.fn.expand '~/.sdkman/candidates/java/17.0.16-amzn' .. ' ./test_runner.sh' -- the bash file to execute
+local RUNNER_CMD = './test_runner.sh' -- the bash file to execute
 
 -- Try to find the repo root by locating either .git or gradlew
 local function repo_root()
@@ -1162,7 +1168,7 @@ end
 -- Build the one-shot shell command (ensures the order & directories)
 local function build_shell(tag_opt)
   local root = repo_root()
-  local gradle = 'JAVA_HOME=' .. vim.fn.expand '~/.sdkman/candidates/java/17.0.16-amzn' .. ' ./gradlew ' .. GRADLE_TASK
+  local gradle = './gradlew ' .. GRADLE_TASK
 
   local tagArg = (tag_opt and #tag_opt > 0) and (' -t ' .. vim.fn.shellescape(tag_opt)) or ''
   -- Chain: cd root && gradle && cd runner dir && run script

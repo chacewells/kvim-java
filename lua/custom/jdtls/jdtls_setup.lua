@@ -62,7 +62,7 @@ function M:setup()
             version = nil, -- use wrapper version
             home = nil, -- use wrapper
             java = {
-              home = nil,
+              home = '/Users/awells10/.sdkman/candidates/java/21.0.7-tem', -- Force Java 21 for Gradle to prevent daemon splitting
             },
             -- Let Gradle handle annotation processing and code generation
             annotationProcessing = {

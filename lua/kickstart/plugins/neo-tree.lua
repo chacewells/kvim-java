@@ -21,7 +21,7 @@ return {
         },
       },
       filtered_items = {
-        visible = true, -- Show filtered (hidden) items
+        visible = false, -- Show filtered (hidden) items
         hide_gitignored = false, -- Show git-ignored files
       },
     },

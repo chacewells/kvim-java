@@ -1243,6 +1243,13 @@ vim.api.nvim_create_user_command('CompileJava', function()
 end, {})
 -- ========== end ==========
 
+-- ========== Gradle CompileTestJava =========
+vim.api.nvim_create_user_command('CompileTestJava', function()
+  vim.cmd '!./gradlew compileTestJava'
+  vim.cmd 'checktime'
+end, {})
+-- ========== end ==========
+
 -- ========== Git Exclude Command ==========
 vim.api.nvim_create_user_command('GitExclude', function()
   local root = repo_root() -- reuse the existing repo_root function

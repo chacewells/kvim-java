@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- configure copilot node runtime location
 vim.g.copilot_node_command = vim.fn.expand '~/.volta/tools/image/node/22.20.0/bin/node'
@@ -190,11 +190,18 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- Start new terminal session
 vim.keymap.set('n', '<leader>ttv', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session in [v]split' })
 vim.keymap.set('n', '<leader>tt.', '<:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer [.] meaning here)' })
-vim.keymap.set('n', '<leader>tcv', '<C-w>v:terminal cursor-agent<CR>', { noremap = true, desc = 'New [T]erminal Session in vsplit running [c]ursor-agent' })
+-- local cli_agent = 'codex'
+local cli_agent = 'cursor-agent'
+vim.keymap.set(
+  'n',
+  '<leader>tcv',
+  '<C-w>v:terminal ' .. cli_agent .. '<CR>',
+  { noremap = true, desc = 'New [T]erminal Session in vsplit running [c]ursor-agent' }
+)
 vim.keymap.set(
   'n',
   '<leader>tc.',
-  '<:terminal cursor-agent<CR>',
+  '<:terminal ' .. cli_agent .. '<CR>',
   { noremap = true, desc = 'New [T]erminal Session running [c]ursor-agent (current buffer [.] meaning here)' }
 )
 
@@ -203,6 +210,10 @@ vim.keymap.set('n', '<leader>to', ':tabnew<CR>', { desc = 'Open [T]ab in [O]wner
 vim.keymap.set('n', '<leader>tx', ':tabclose<CR>', { desc = 'Close [T]ab in e[X]it' })
 vim.keymap.set('n', '<leader>t]', ':tabnext<CR>', { desc = 'Go to [T]ab [N]ext' })
 vim.keymap.set('n', '<leader>t[', ':tabprev<CR>', { desc = 'Go to [T]ab [P]revious' })
+
+-- Buffer management
+vim.keymap.set('n', '<leader>bda', ':bufdo bdelete<CR>', { desc = 'Buffer [D]elete [A]ll' })
+vim.keymap.set('n', '<leader>bd.', ':bdelete<CR>', { desc = 'Buffer [D]elete [.]Here' })
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -267,10 +278,28 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
+  's1n7ax/nvim-window-picker',
+  'direnv/direnv.vim',
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
   'sindrets/diffview.nvim', -- Git diff viewer and more
   'tpope/vim-fugitive', -- Git commands in nvim
-
+  'tpope/vim-rhubarb', -- GBrowse plugin for github
+  -- {
+  --   'stevearc/oil.nvim',
+  --   ---@module 'oil'
+  --   ---@type oil.SetupOpts
+  --   opts = {
+  --     buf_options = {
+  --       modifiable = true,
+  --       write = true,
+  --     },
+  --   },
+  --   -- Optional dependencies
+  --   -- dependencies = { { 'nvim-mini/mini.icons', opts = {} } },
+  --   dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if you prefer nvim-web-devicons
+  --   -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
+  --   lazy = false,
+  -- },
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -502,6 +531,11 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
+
+      -- Shortcut for searching your Neovim configuration files
+      vim.keymap.set('n', '<leader>sc', function()
+        builtin.find_files { cwd = vim.fn.expand '~/IdeaProjects/notes' }
+      end, { desc = '[S]earch [C]hewy notes' })
 
       -- helper to get visual selection
       local function get_visual_selection()
@@ -1270,25 +1304,33 @@ vim.api.nvim_create_user_command('GitExclude', function()
   vim.cmd('edit ' .. vim.fn.fnameescape(exclude_path))
 end, { desc = 'Open .git/info/exclude file for editing' })
 -- ========== end ==========
---
--- ========== Open in GitHub ==========
-vim.api.nvim_create_user_command('OpenInGitHub', function()
-  local filepath = vim.fn.expand '%:p'
-  local root = repo_root()
-  local relpath = filepath:sub(#root + 2)
-  local line = vim.fn.line '.'
-  local remote_url = vim.fn.systemlist('git -C ' .. root .. ' remote get-url origin')[1] or ''
-  if remote_url == '' then
-    vim.notify('No git remote found', vim.log.levels.ERROR)
-    return
-  end
-  -- Convert git@github.com:owner/repo.git or https://github.com/owner/repo.git to https://github.com/owner/repo
-  local github_url = remote_url:gsub('^git@github.com:', 'https://github.com/'):gsub('%.git$', ''):gsub('^https://github.com/', 'https://github.com/')
-  -- Get current branch
-  local branch = vim.fn.systemlist('git -C ' .. root .. ' rev-parse --abbrev-ref HEAD')[1] or 'main'
-  local url = string.format('%s/blob/%s/%s#L%d', github_url, branch, relpath, line)
-  vim.fn.system { 'open', url }
-end, { desc = 'Open current file/line in GitHub' })
+
+-- ========== Edit Global Gradle Command ==========
+vim.api.nvim_create_user_command('EditGlobalGradle', function()
+  local gradle_config_path = vim.fn.expand '~/.gradle/gradle.properties'
+  vim.cmd('edit ' .. gradle_config_path)
+end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' })
+-- ========== end ==========
+
+-- ========== DevContainerExec Command ==========
+vim.api.nvim_create_user_command('DevContainerExec', function()
+  vim.cmd 'terminal devcontainer exec bash'
+end, { desc = 'Open "devcontainer exec bash" in a new terminal' })
+-- ========== end ==========
+
+-- ========== QuickfixSort Command ==========
+vim.api.nvim_create_user_command('SortQuickFix', function()
+  local items = vim.fn.getqflist()
+  table.sort(items, function(a, b)
+    local name_a = a.bufnr ~= 0 and vim.fn.bufname(a.bufnr) or ''
+    local name_b = b.bufnr ~= 0 and vim.fn.bufname(b.bufnr) or ''
+    if name_a ~= name_b then
+      return name_a < name_b
+    end
+    return a.lnum < b.lnum
+  end)
+  vim.fn.setqflist(items, 'r')
+end, { desc = 'Sort the quickfix list by filename' })
 -- ========== end ==========
 
 -- The line beneath this is called `modeline`. See `:help modeline`

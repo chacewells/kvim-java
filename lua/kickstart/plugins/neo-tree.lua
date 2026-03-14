@@ -24,6 +24,7 @@ return {
         visible = false, -- Show filtered (hidden) items
         hide_gitignored = false, -- Show git-ignored files
       },
+      group_empty_dirs = true,
     },
   },
 }

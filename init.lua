@@ -169,6 +169,13 @@ vim.o.scrolloff = 10
 -- See `:help 'confirm'`
 vim.o.confirm = true
 
+-- Add filetype definitions
+vim.filetype.add {
+  pattern = {
+    ['.*%.Jenkinsfile'] = 'groovy',
+  },
+}
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -190,8 +197,8 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- Start new terminal session
 vim.keymap.set('n', '<leader>ttv', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session in [v]split' })
 vim.keymap.set('n', '<leader>tt.', '<:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer [.] meaning here)' })
--- local cli_agent = 'codex'
-local cli_agent = 'cursor-agent'
+local cli_agent = 'codex'
+-- local cli_agent = 'cursor-agent'
 vim.keymap.set(
   'n',
   '<leader>tcv',
@@ -229,6 +236,16 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+vim.keymap.set('i', '<C-h>', '<Esc><C-w>h', { desc = 'Move to left window' })
+vim.keymap.set('i', '<C-j>', '<Esc><C-w>j', { desc = 'Move to lower window' })
+vim.keymap.set('i', '<C-k>', '<Esc><C-w>k', { desc = 'Move to upper window' })
+vim.keymap.set('i', '<C-l>', '<Esc><C-w>l', { desc = 'Move to right window' })
+
+vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]], { desc = 'Move to left window' })
+vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]], { desc = 'Move to lower window' })
+vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]], { desc = 'Move to upper window' })
+vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]], { desc = 'Move to right window' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -284,22 +301,30 @@ require('lazy').setup({
   'sindrets/diffview.nvim', -- Git diff viewer and more
   'tpope/vim-fugitive', -- Git commands in nvim
   'tpope/vim-rhubarb', -- GBrowse plugin for github
-  -- {
-  --   'stevearc/oil.nvim',
-  --   ---@module 'oil'
-  --   ---@type oil.SetupOpts
-  --   opts = {
-  --     buf_options = {
-  --       modifiable = true,
-  --       write = true,
-  --     },
-  --   },
-  --   -- Optional dependencies
-  --   -- dependencies = { { 'nvim-mini/mini.icons', opts = {} } },
-  --   dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if you prefer nvim-web-devicons
-  --   -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
-  --   lazy = false,
-  -- },
+  {
+    'phelipetls/jsonpath.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+  },
+  {
+    'Einenlum/yaml-revealer',
+    ft = { 'yaml' },
+  },
+  {
+    'stevearc/oil.nvim',
+    ---@module 'oil'
+    ---@type oil.SetupOpts
+    opts = {
+      buf_options = {
+        modifiable = true,
+      },
+      default_file_explorer = false,
+    },
+    -- Optional dependencies
+    -- dependencies = { { 'nvim-mini/mini.icons', opts = {} } },
+    dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if you prefer nvim-web-devicons
+    -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
+    lazy = false,
+  },
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -1094,7 +1119,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'perl', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'json' },
+      ensure_installed = { 'scala', 'perl', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'json' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1312,10 +1337,22 @@ vim.api.nvim_create_user_command('EditGlobalGradle', function()
 end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' })
 -- ========== end ==========
 
+-- ========== DevContainerUp Command ==========
+vim.api.nvim_create_user_command('DevContainerUp', function()
+  vim.cmd '!devcontainer up'
+end, { desc = 'Open "devcontainer up" in a new terminal' })
+-- ========== end ==========
+
 -- ========== DevContainerExec Command ==========
 vim.api.nvim_create_user_command('DevContainerExec', function()
   vim.cmd 'terminal devcontainer exec bash'
 end, { desc = 'Open "devcontainer exec bash" in a new terminal' })
+-- ========== end ==========
+
+-- ========== ReturnsIntegrationTest Command ==========
+vim.api.nvim_create_user_command('ReturnsIntegrationTest', function()
+  run_in_terminal(build_shell(nil))
+end, { desc = 'Run returns integration test suite' })
 -- ========== end ==========
 
 -- ========== QuickfixSort Command ==========
@@ -1331,6 +1368,29 @@ vim.api.nvim_create_user_command('SortQuickFix', function()
   end)
   vim.fn.setqflist(items, 'r')
 end, { desc = 'Sort the quickfix list by filename' })
+-- ========== end ==========
+
+-- ========== Open In Finder Command ==========
+local function open_current_working_dir_in_finder()
+  local cwd = vim.fn.getcwd()
+
+  if cwd == nil or cwd == '' then
+    vim.notify('Could not determine the current working directory', vim.log.levels.ERROR)
+    return
+  end
+
+  local job_id = vim.fn.jobstart({ 'open', cwd }, { detach = true })
+  if job_id <= 0 then
+    vim.notify('Failed to open Finder for ' .. cwd, vim.log.levels.ERROR)
+    return
+  end
+
+  vim.notify('Opened Finder: ' .. cwd, vim.log.levels.INFO)
+end
+
+vim.api.nvim_create_user_command('OpenInFinder', open_current_working_dir_in_finder, {
+  desc = "Open the current window's working directory in Finder",
+})
 -- ========== end ==========
 
 -- The line beneath this is called `modeline`. See `:help modeline`

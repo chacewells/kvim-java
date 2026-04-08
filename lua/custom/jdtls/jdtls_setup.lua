@@ -5,6 +5,10 @@ function M:setup()
   local workspace_dir = vim.fn.stdpath 'data' .. '/workspaces/' .. project_name -- todo get workspace data directory
   local java = vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem/bin/java'
   local lombok = vim.fn.stdpath 'data' .. '/mason/packages/jdtls/lombok.jar'
+  local launcher_jar = vim.fn.expand(vim.fn.stdpath 'data' .. '/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar')
+  local config_name = vim.fn.has 'linux' == 1 and 'config_linux_arm' or 'config_mac_arm'
+  local config_location = vim.fn.expand(vim.fn.stdpath 'data' .. '/mason/packages/jdtls/' .. config_name)
+
   -- local gradle_java_home = project_name == 'order-a' and '/Users/awells10/.sdkman/candidates/java/11.0.29-tem' or nil
   local config = {
     cmd = {
@@ -24,10 +28,10 @@ function M:setup()
       '-javaagent:' .. lombok,
       -- point to eclipse.jdt.ls launcher jar
       '-jar',
-      '/Users/awells10/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.7.0.v20250519-0528.jar',
+      launcher_jar,
       '-configuration',
       -- eclipse.jdt.ls configuration dir (likely mac_arm or something)
-      '/Users/awells10/.local/share/nvim/mason/packages/jdtls/config_mac_arm',
+      config_location,
       '-data',
       workspace_dir,
     },
@@ -40,15 +44,15 @@ function M:setup()
           runtimes = {
             {
               name = 'JavaSE-21',
-              path = '/Users/awells10/.sdkman/candidates/java/21.0.7-tem',
+              path = vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem',
             },
             {
               name = 'JavaSE-17',
-              path = '/Users/awells10/.sdkman/candidates/java/17.0.12-tem',
+              path = vim.fn.expand '~/.sdkman/candidates/java/17.0.12-tem',
             },
             {
               name = 'JavaSE-11',
-              path = '/Users/awells10/.sdkman/candidates/java/11.0.29-tem',
+              path = vim.fn.expand '~/.sdkman/candidates/java/11.0.29-tem',
             },
           },
         },
@@ -62,7 +66,7 @@ function M:setup()
             version = nil, -- use wrapper version
             home = nil, -- use wrapper
             java = {
-              home = '/Users/awells10/.sdkman/candidates/java/21.0.7-tem', -- Force Java 21 for Gradle to prevent daemon splitting
+              home = vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem', -- Force Java 21 for Gradle to prevent daemon splitting
             },
             -- Let Gradle handle annotation processing and code generation
             annotationProcessing = {

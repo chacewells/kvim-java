@@ -1393,5 +1393,17 @@ vim.api.nvim_create_user_command('OpenInFinder', open_current_working_dir_in_fin
 })
 -- ========== end ==========
 
+-- ========== Add Current DateStamp ==========
+vim.api.nvim_create_user_command('DateStamp', function()
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local date_stamp = os.date '%Y-%m-%d'
+
+  vim.api.nvim_buf_set_text(0, row - 1, col + 1, row - 1, col + 1, { date_stamp })
+end, {
+  desc = 'Insert the current date at the cursor position',
+})
+
+-- ========== end ==========
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

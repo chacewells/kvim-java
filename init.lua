@@ -198,6 +198,9 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 vim.keymap.set('n', '<leader>ttv', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session in [v]split' })
 vim.keymap.set('n', '<leader>tt.', '<:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer [.] meaning here)' })
 local cli_agent = 'codex'
+if vim.fn.has 'linux' then
+  cli_agent = 'claude'
+end
 -- local cli_agent = 'cursor-agent'
 vim.keymap.set(
   'n',

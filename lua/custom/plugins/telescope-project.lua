@@ -2,7 +2,13 @@ return {
   'nvim-telescope/telescope-project.nvim',
   dependencies = { 'nvim-telescope/telescope.nvim' },
   keys = {
-    { '<leader>sp', '<cmd>Telescope project<cr>', desc = '[S]earch [P]rojects' },
+    {
+      '<leader>sp',
+      function()
+        require('telescope').extensions.project.project { display_type = 'full', hide_workspace = true }
+      end,
+      desc = '[S]earch [P]rojects',
+    },
   },
   config = function()
     -- local project_actions  = require("telescope._extensions.project.actions")
@@ -29,6 +35,7 @@ return {
           base_dirs = existing_dirs,
           hidden_files = true, -- include dotfiles?
           order_by = 'recent', -- sort by last-used
+          search_by = { 'title', 'path' },
           sync_with_nvim_tree = true, -- keep nvim-tree in sync
           cd_scope = { 'tab' },
           --[[ on_project_selected = function(prompt_bufnr)

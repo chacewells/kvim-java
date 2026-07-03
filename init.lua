@@ -1347,6 +1347,13 @@ vim.api.nvim_create_user_command('EditGlobalGradle', function()
 end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' })
 -- ========== end ==========
 
+-- ========== Edit WezTerm Config Command ==========
+vim.api.nvim_create_user_command('EditWeztermConfig', function()
+  local wezterm_config_path = vim.fn.expand '~/.wezterm.lua'
+  vim.cmd('edit ' .. vim.fn.fnameescape(wezterm_config_path))
+end, { desc = 'Edit WezTerm configuration at ~/.wezterm.lua' })
+-- ========== end ==========
+
 -- ========== DevContainerUp Command ==========
 vim.api.nvim_create_user_command('DevContainerUp', function()
   vim.cmd '!devcontainer up'

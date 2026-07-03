@@ -305,6 +305,24 @@ require('lazy').setup({
   'tpope/vim-fugitive', -- Git commands in nvim
   'tpope/vim-rhubarb', -- GBrowse plugin for github
   {
+    'christoomey/vim-tmux-navigator',
+    cmd = {
+      'TmuxNavigateLeft',
+      'TmuxNavigateDown',
+      'TmuxNavigateUp',
+      'TmuxNavigateRight',
+      'TmuxNavigatePrevious',
+      'TmuxNavigatorProcessList',
+    },
+    keys = {
+      { '<c-h>', '<cmd><C-U>TmuxNavigateLeft<cr>' },
+      { '<c-j>', '<cmd><C-U>TmuxNavigateDown<cr>' },
+      { '<c-k>', '<cmd><C-U>TmuxNavigateUp<cr>' },
+      { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
+      { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
+    },
+  },
+  {
     'phelipetls/jsonpath.nvim',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
   },
@@ -1345,6 +1363,13 @@ vim.api.nvim_create_user_command('EditGlobalGradle', function()
   local gradle_config_path = vim.fn.expand '~/.gradle/gradle.properties'
   vim.cmd('edit ' .. gradle_config_path)
 end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' })
+-- ========== end ==========
+
+-- ========== Edit Tmux Config Command ==========
+vim.api.nvim_create_user_command('EditTmuxConfig', function()
+  local tmux_config_path = vim.fn.expand '~/.tmux.conf'
+  vim.cmd('edit ' .. vim.fn.fnameescape(tmux_config_path))
+end, { desc = 'Edit Tmux configuration at ~/.tmux.conf' })
 -- ========== end ==========
 
 -- ========== Edit WezTerm Config Command ==========

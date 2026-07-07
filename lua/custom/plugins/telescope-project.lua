@@ -37,7 +37,7 @@ return {
           order_by = 'recent', -- sort by last-used
           search_by = { 'title', 'path' },
           sync_with_nvim_tree = true, -- keep nvim-tree in sync
-          cd_scope = { 'tab' },
+          cd_scope = { 'global' },
           --[[ on_project_selected = function(prompt_bufnr)
               -- this will :cd into the project root
               project_actions.change_working_directory(prompt_bufnr, false)

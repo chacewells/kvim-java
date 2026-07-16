@@ -1082,20 +1082,52 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    'catppuccin/nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
+      require('catppuccin').setup {
+        flavour = 'auto',
+        background = {
+          light = 'latte',
+          dark = 'mocha',
         },
       }
 
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight'
+      -- Set colorscheme to catppuccin
+      vim.cmd.colorscheme 'catppuccin'
+
+      -- React to Appearance Changes
+      local group = vim.api.nvim_create_augroup('appearance', { clear = true })
+
+      vim.api.nvim_create_autocmd('OptionSet', {
+        group = group,
+        pattern = 'background',
+        callback = function()
+          vim.cmd.colorscheme 'catppuccin'
+        end,
+      })
+      local function system_background(callback)
+        vim.system({ 'defaults', 'read', '-g', 'AppleInterfaceStyle' }, { text = true }, function(result)
+          -- `defaults` exits nonzero in light mode because the key is absent.
+          callback(result.code == 0 and 'dark' or 'light')
+        end)
+      end
+
+      local function update_background()
+        system_background(function(background)
+          vim.schedule(function()
+            if vim.o.background ~= background then
+              vim.o.background = background
+            end
+          end)
+        end)
+      end
+
+      update_background()
+
+      local timer = vim.uv.new_timer()
+
+      timer:start(1000, 1000, vim.schedule_wrap(update_background))
     end,
   },
 

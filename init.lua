@@ -1106,17 +1106,45 @@ require('lazy').setup({
           vim.cmd.colorscheme 'catppuccin'
         end,
       })
+      local function is_wsl()
+        return vim.fn.has 'wsl' == 1 or vim.env.WSL_DISTRO_NAME ~= nil or vim.env.WSL_INTEROP ~= nil
+      end
+
       local function system_background(callback)
-        vim.system({ 'defaults', 'read', '-g', 'AppleInterfaceStyle' }, { text = true }, function(result)
-          -- `defaults` exits nonzero in light mode because the key is absent.
-          callback(result.code == 0 and 'dark' or 'light')
-        end)
+        if vim.fn.has 'mac' == 1 then
+          vim.system({ 'defaults', 'read', '-g', 'AppleInterfaceStyle' }, { text = true }, function(result)
+            -- `defaults` exits nonzero in light mode because the key is absent.
+            callback(result.code == 0 and 'dark' or 'light')
+          end)
+        elseif is_wsl() then
+          vim.system(
+            {
+              'reg.exe',
+              'query',
+              [[HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]],
+              '/v',
+              'AppsUseLightTheme',
+            },
+            { text = true },
+            function(result)
+              if result.code ~= 0 then
+                callback(nil)
+                return
+              end
+
+              local apps_use_light_theme = result.stdout:match 'AppsUseLightTheme%s+REG_DWORD%s+0x(%x+)'
+              callback(tonumber(apps_use_light_theme or '1', 16) == 0 and 'dark' or 'light')
+            end
+          )
+        else
+          callback(nil)
+        end
       end
 
       local function update_background()
         system_background(function(background)
           vim.schedule(function()
-            if vim.o.background ~= background then
+            if background and vim.o.background ~= background then
               vim.o.background = background
             end
           end)

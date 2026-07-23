@@ -1117,25 +1117,21 @@ require('lazy').setup({
             callback(result.code == 0 and 'dark' or 'light')
           end)
         elseif is_wsl() then
-          vim.system(
-            {
-              'reg.exe',
-              'query',
-              [[HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]],
-              '/v',
-              'AppsUseLightTheme',
-            },
-            { text = true },
-            function(result)
-              if result.code ~= 0 then
-                callback(nil)
-                return
-              end
-
-              local apps_use_light_theme = result.stdout:match 'AppsUseLightTheme%s+REG_DWORD%s+0x(%x+)'
-              callback(tonumber(apps_use_light_theme or '1', 16) == 0 and 'dark' or 'light')
+          vim.system({
+            'reg.exe',
+            'query',
+            [[HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]],
+            '/v',
+            'AppsUseLightTheme',
+          }, { text = true }, function(result)
+            if result.code ~= 0 then
+              callback(nil)
+              return
             end
-          )
+
+            local apps_use_light_theme = result.stdout:match 'AppsUseLightTheme%s+REG_DWORD%s+0x(%x+)'
+            callback(tonumber(apps_use_light_theme or '1', 16) == 0 and 'dark' or 'light')
+          end)
         else
           callback(nil)
         end
@@ -1206,7 +1202,23 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'scala', 'perl', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'json' },
+      ensure_installed = {
+        'scala',
+        'perl',
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+        'json',
+        'yaml',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {

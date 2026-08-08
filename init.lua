@@ -906,6 +906,7 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'prettierd', -- Used to format web/markdown/graphql/html/etc.
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -1367,9 +1368,9 @@ end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' 
 
 -- ========== Edit Tmux Config Command ==========
 vim.api.nvim_create_user_command('EditTmuxConfig', function()
-  local tmux_config_path = vim.fn.expand '~/.config/tmus/tmux.conf'
+  local tmux_config_path = vim.fn.expand '~/.tmux.conf'
   vim.cmd('edit ' .. vim.fn.fnameescape(tmux_config_path))
-end, { desc = 'Edit Tmux configuration at ~/.config/tmus/tmux.conf' })
+end, { desc = 'Edit Tmux configuration at ~/.tmux.conf' })
 -- ========== end ==========
 
 -- ========== Edit WezTerm Config Command ==========

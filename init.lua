@@ -304,7 +304,7 @@ require('lazy').setup({
   'sindrets/diffview.nvim', -- Git diff viewer and more
   'tpope/vim-fugitive', -- Git commands in nvim
   'tpope/vim-rhubarb', -- GBrowse plugin for github
-  {
+  --[[ {
     'christoomey/vim-tmux-navigator',
     cmd = {
       'TmuxNavigateLeft',
@@ -321,7 +321,7 @@ require('lazy').setup({
       { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
       { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
     },
-  },
+  }, ]]
   {
     'phelipetls/jsonpath.nvim',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
@@ -1197,12 +1197,15 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
     build = ':TSUpdate',
     lazy = false,
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = {
+    config = function()
+      local treesitter = require 'nvim-treesitter'
+      treesitter.setup {}
+
+      local ensure_installed = {
         'scala',
         'perl',
         'bash',
@@ -1218,19 +1221,35 @@ require('lazy').setup({
         'vimdoc',
         'json',
         'yaml',
-      },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        disable = { 'markdown', 'markdown_inline' },
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
+      }
+
+      -- Parser installation is asynchronous and is a no-op for parsers that are
+      -- already installed. `:TSUpdate` (also run after plugin updates) refreshes
+      -- parsers when their pinned grammar revisions change.
+      treesitter.install(ensure_installed)
+
+      local disabled_highlighting = {
+        markdown = true,
+        markdown_inline = true,
+      }
+
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('kickstart-treesitter', { clear = true }),
+        callback = function(event)
+          local filetype = vim.bo[event.buf].filetype
+          if disabled_highlighting[filetype] then
+            return
+          end
+
+          -- `vim.treesitter.start()` is Neovim's built-in highlighter. Ignore
+          -- filetypes without an installed parser and retain their Vim syntax.
+          local started = pcall(vim.treesitter.start, event.buf)
+          if started and filetype ~= 'ruby' then
+            vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
+    end,
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
     --
@@ -1437,19 +1456,19 @@ vim.api.nvim_create_user_command('EditGlobalGradle', function()
 end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' })
 -- ========== end ==========
 
--- ========== Edit Tmux Config Command ==========
+--[[ ========== Edit Tmux Config Command ==========
 vim.api.nvim_create_user_command('EditTmuxConfig', function()
-  local tmux_config_path = vim.fn.expand '~/.config/tmus/tmux.conf'
+  local tmux_config_path = vim.fn.expand '~/.config/tmux/tmux.conf'
   vim.cmd('edit ' .. vim.fn.fnameescape(tmux_config_path))
-end, { desc = 'Edit Tmux configuration at ~/.config/tmus/tmux.conf' })
--- ========== end ==========
+end, { desc = 'Edit Tmux configuration at ~/.config/tmux/tmux.conf' })
+-- ========== end ==========]]
 
--- ========== Edit WezTerm Config Command ==========
+--[[ ========== Edit WezTerm Config Command ==========
 vim.api.nvim_create_user_command('EditWeztermConfig', function()
   local wezterm_config_path = vim.fn.expand '~/.config/wezterm/wezterm.lua'
   vim.cmd('edit ' .. vim.fn.fnameescape(wezterm_config_path))
 end, { desc = 'Edit WezTerm configuration' })
--- ========== end ==========
+-- ========== end ==========]]
 
 -- ========== DevContainerUp Command ==========
 vim.api.nvim_create_user_command('DevContainerUp', function()

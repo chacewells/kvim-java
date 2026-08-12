@@ -1448,5 +1448,14 @@ end, {
 
 -- ========== end ==========
 
+-- ========== Unwritable scratch buffer ==========
+vim.keymap.set('n', '<leader>x', function()
+  vim.cmd 'enew'
+  vim.bo.buftype = 'nofile'
+  vim.bo.bufhidden = 'wipe'
+  vim.bo.swapfile = false
+end, { desc = 'Open scratch buffer' })
+-- ========== end ==========
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

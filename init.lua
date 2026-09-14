@@ -1453,6 +1453,13 @@ vim.api.nvim_create_user_command('EditGlobalGradle', function()
 end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' })
 -- ========== end ==========
 
+-- ========== Edit Zshrc ==========
+vim.api.nvim_create_user_command('EditZshrc', function()
+  local gradle_config_path = vim.fn.expand '~/.zshrc'
+  vim.cmd('edit ' .. gradle_config_path)
+end, { desc = 'Edit ~/.zshrc' })
+-- ========== end ==========
+
 --[[ ========== Edit Tmux Config Command ==========
 vim.api.nvim_create_user_command('EditTmuxConfig', function()
   local tmux_config_path = vim.fn.expand '~/.config/tmux/tmux.conf'

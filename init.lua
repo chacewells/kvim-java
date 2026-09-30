@@ -169,7 +169,7 @@ vim.o.confirm = true
 -- Add filetype definitions
 vim.filetype.add {
   pattern = {
-    ['.*%.Jenkinsfile'] = 'groovy',
+    ['.*Jenkinsfile'] = 'groovy',
   },
 }
 
@@ -556,6 +556,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>gb', builtin.git_branches, { desc = '[G]it [B]ranches' })
       vim.keymap.set('n', '<leader>gC', builtin.git_commits, { desc = '[G]it: Repo [C]ommits' })
       vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = '[G]it [S]tatus' })
+      vim.keymap.set('n', '<leader>gt', builtin.git_stash, { desc = '[G]it S[t]ashes' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -902,6 +903,7 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
+        'npm-groovy-lint', -- Used to format Groovy and Jenkinsfiles
         'stylua', -- Used to format Lua code
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -951,7 +953,8 @@ require('lazy').setup({
           return nil
         else
           return {
-            timeout_ms = 500,
+            -- npm-groovy-lint starts Node and Java and needs a little longer.
+            timeout_ms = vim.bo[bufnr].filetype == 'groovy' and 5000 or 500,
             lsp_format = 'fallback',
           }
         end
@@ -960,6 +963,7 @@ require('lazy').setup({
         -- Conform can also run multiple formatters sequentially
         -- You can use 'stop_after_first' to run the first available formatter from the list
         graphql = { 'prettierd' },
+        groovy = { 'npm-groovy-lint' },
         html = { 'prettierd' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         lua = { 'stylua' },
@@ -971,6 +975,13 @@ require('lazy').setup({
         sh = { 'shfmt' },
         bash = { 'shfmt' },
         zsh = { 'shfmt' },
+      },
+      formatters = {
+        ['npm-groovy-lint'] = {
+          -- Format only, skip the follow-up lint pass, and avoid the local
+          -- CodeNarc server that can make npm-groovy-lint unreliable.
+          args = { '--noserver', '--format', '--nolintafter', '$FILENAME' },
+        },
       },
     },
   },
@@ -1455,9 +1466,16 @@ end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' 
 
 -- ========== Edit Zshrc ==========
 vim.api.nvim_create_user_command('EditZshrc', function()
-  local gradle_config_path = vim.fn.expand '~/.zshrc'
-  vim.cmd('edit ' .. gradle_config_path)
+  local zshrc_path = vim.fn.expand '~/.zshrc'
+  vim.cmd('edit ' .. zshrc_path)
 end, { desc = 'Edit ~/.zshrc' })
+-- ========== end ==========
+
+-- ========== Edit Aws Config ==========
+vim.api.nvim_create_user_command('EditAwsConfig', function()
+  local aws_config_path = vim.fn.expand '~/.aws/config'
+  vim.cmd('edit ' .. aws_config_path)
+end, { desc = 'Edit ~/.aws/config' })
 -- ========== end ==========
 
 --[[ ========== Edit Tmux Config Command ==========
@@ -1538,6 +1556,42 @@ vim.api.nvim_create_user_command('DateStamp', function()
   vim.api.nvim_buf_set_text(0, row - 1, col + 1, row - 1, col + 1, { date_stamp })
 end, {
   desc = 'Insert the current date at the cursor position',
+})
+
+-- ========== end ==========
+
+-- ========== Git stash debug helpers ==========
+
+-- stash dev debug configuration
+vim.api.nvim_create_user_command('StashDebugDev', function()
+  vim.cmd 'Git stash push --staged --message "worfklow:debug-dev"'
+end, {
+  desc = 'Push currently staged changes to the "dev-debug" stash',
+})
+
+-- stash qat debug configuration
+vim.api.nvim_create_user_command('StashDebugQat', function()
+  vim.cmd 'Git stash push --staged --message "worfklow:debug-qat"'
+end, {
+  desc = 'Push currently staged changes to the "worfklow:debug-qat" stash',
+})
+
+-- stash stg debug configuration
+vim.api.nvim_create_user_command('StashDebugStg', function()
+  vim.cmd 'Git stash push --staged --message "worfklow:debug-stg"'
+end, {
+  desc = 'Push currently staged changes to the "worfklow:debug-stg" stash',
+})
+
+-- ========== end ==========
+
+-- ========== Git stash debug helpers ==========
+
+-- stash stg debug configuration
+vim.api.nvim_create_user_command('GSyncMain', function()
+  vim.cmd 'Git fetch origin main:main'
+end, {
+  desc = 'Push currently staged changes to the "worfklow:debug-stg" stash',
 })
 
 -- ========== end ==========

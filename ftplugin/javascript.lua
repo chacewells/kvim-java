@@ -1,4 +1,4 @@
--- Set indentation for Perl files
+-- Set indentation for JavaScript files
 vim.opt_local.tabstop = 2
 vim.opt_local.shiftwidth = 2
 vim.bo.expandtab = true -- use spaces instead of tabs

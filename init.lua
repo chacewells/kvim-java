@@ -93,9 +93,6 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
--- configure copilot node runtime location
-vim.g.copilot_node_command = vim.fn.expand '~/.volta/tools/image/node/22.20.0/bin/node'
-
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -172,7 +169,7 @@ vim.o.confirm = true
 -- Add filetype definitions
 vim.filetype.add {
   pattern = {
-    ['.*%.Jenkinsfile'] = 'groovy',
+    ['.*Jenkinsfile'] = 'groovy',
   },
 }
 
@@ -198,7 +195,7 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 vim.keymap.set('n', '<leader>ttv', '<C-w>v:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session in [v]split' })
 vim.keymap.set('n', '<leader>tt.', '<:terminal<CR>', { noremap = true, desc = 'New [T]erminal Session (current buffer [.] meaning here)' })
 local cli_agent = 'codex'
-if vim.fn.has 'linux' then
+if vim.fn.has 'linux' == 1 then
   cli_agent = 'claude'
 end
 -- local cli_agent = 'cursor-agent'
@@ -304,7 +301,7 @@ require('lazy').setup({
   'sindrets/diffview.nvim', -- Git diff viewer and more
   'tpope/vim-fugitive', -- Git commands in nvim
   'tpope/vim-rhubarb', -- GBrowse plugin for github
-  {
+  --[[ {
     'christoomey/vim-tmux-navigator',
     cmd = {
       'TmuxNavigateLeft',
@@ -321,7 +318,7 @@ require('lazy').setup({
       { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
       { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
     },
-  },
+  }, ]]
   {
     'phelipetls/jsonpath.nvim',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
@@ -559,6 +556,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>gb', builtin.git_branches, { desc = '[G]it [B]ranches' })
       vim.keymap.set('n', '<leader>gC', builtin.git_commits, { desc = '[G]it: Repo [C]ommits' })
       vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = '[G]it [S]tatus' })
+      vim.keymap.set('n', '<leader>gt', builtin.git_stash, { desc = '[G]it S[t]ashes' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -905,6 +903,7 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
+        'npm-groovy-lint', -- Used to format Groovy and Jenkinsfiles
         'stylua', -- Used to format Lua code
         'prettierd', -- Used to format web/markdown/graphql/html/etc.
       })
@@ -955,7 +954,8 @@ require('lazy').setup({
           return nil
         else
           return {
-            timeout_ms = 500,
+            -- npm-groovy-lint starts Node and Java and needs a little longer.
+            timeout_ms = vim.bo[bufnr].filetype == 'groovy' and 5000 or 500,
             lsp_format = 'fallback',
           }
         end
@@ -964,6 +964,7 @@ require('lazy').setup({
         -- Conform can also run multiple formatters sequentially
         -- You can use 'stop_after_first' to run the first available formatter from the list
         graphql = { 'prettierd' },
+        groovy = { 'npm-groovy-lint' },
         html = { 'prettierd' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         lua = { 'stylua' },
@@ -975,6 +976,13 @@ require('lazy').setup({
         sh = { 'shfmt' },
         bash = { 'shfmt' },
         zsh = { 'shfmt' },
+      },
+      formatters = {
+        ['npm-groovy-lint'] = {
+          -- Format only, skip the follow-up lint pass, and avoid the local
+          -- CodeNarc server that can make npm-groovy-lint unreliable.
+          args = { '--noserver', '--format', '--nolintafter', '$FILENAME' },
+        },
       },
     },
   },
@@ -1083,20 +1091,76 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    'catppuccin/nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
+      require('catppuccin').setup {
+        flavour = 'auto',
+        background = {
+          light = 'latte',
+          dark = 'mocha',
         },
       }
 
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight'
+      -- Set colorscheme to catppuccin
+      vim.cmd.colorscheme 'catppuccin'
+
+      -- React to Appearance Changes
+      local group = vim.api.nvim_create_augroup('appearance', { clear = true })
+
+      vim.api.nvim_create_autocmd('OptionSet', {
+        group = group,
+        pattern = 'background',
+        callback = function()
+          vim.cmd.colorscheme 'catppuccin'
+        end,
+      })
+      local function is_wsl()
+        return vim.fn.has 'wsl' == 1 or vim.env.WSL_DISTRO_NAME ~= nil or vim.env.WSL_INTEROP ~= nil
+      end
+
+      local function system_background(callback)
+        if vim.fn.has 'mac' == 1 then
+          vim.system({ 'defaults', 'read', '-g', 'AppleInterfaceStyle' }, { text = true }, function(result)
+            -- `defaults` exits nonzero in light mode because the key is absent.
+            callback(result.code == 0 and 'dark' or 'light')
+          end)
+        elseif is_wsl() then
+          vim.system({
+            'reg.exe',
+            'query',
+            [[HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]],
+            '/v',
+            'AppsUseLightTheme',
+          }, { text = true }, function(result)
+            if result.code ~= 0 then
+              callback(nil)
+              return
+            end
+
+            local apps_use_light_theme = result.stdout:match 'AppsUseLightTheme%s+REG_DWORD%s+0x(%x+)'
+            callback(tonumber(apps_use_light_theme or '1', 16) == 0 and 'dark' or 'light')
+          end)
+        else
+          callback(nil)
+        end
+      end
+
+      local function update_background()
+        system_background(function(background)
+          vim.schedule(function()
+            if background and vim.o.background ~= background then
+              vim.o.background = background
+            end
+          end)
+        end)
+      end
+
+      update_background()
+
+      local timer = vim.uv.new_timer()
+
+      timer:start(1000, 1000, vim.schedule_wrap(update_background))
     end,
   },
 
@@ -1142,24 +1206,59 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
     build = ':TSUpdate',
     lazy = false,
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = { 'scala', 'perl', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'json' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        disable = { 'markdown', 'markdown_inline' },
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
+    config = function()
+      local treesitter = require 'nvim-treesitter'
+      treesitter.setup {}
+
+      local ensure_installed = {
+        'scala',
+        'perl',
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+        'json',
+        'yaml',
+      }
+
+      -- Parser installation is asynchronous and is a no-op for parsers that are
+      -- already installed. `:TSUpdate` (also run after plugin updates) refreshes
+      -- parsers when their pinned grammar revisions change.
+      treesitter.install(ensure_installed)
+
+      local disabled_highlighting = {
+        markdown = true,
+        markdown_inline = true,
+      }
+
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('kickstart-treesitter', { clear = true }),
+        callback = function(event)
+          local filetype = vim.bo[event.buf].filetype
+          if disabled_highlighting[filetype] then
+            return
+          end
+
+          -- `vim.treesitter.start()` is Neovim's built-in highlighter. Ignore
+          -- filetypes without an installed parser and retain their Vim syntax.
+          local started = pcall(vim.treesitter.start, event.buf)
+          if started and filetype ~= 'ruby' then
+            vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
+    end,
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
     --
@@ -1373,12 +1472,33 @@ vim.api.nvim_create_user_command('EditTmuxConfig', function()
 end, { desc = 'Edit Tmux configuration at ~/.tmux.conf' })
 -- ========== end ==========
 
--- ========== Edit WezTerm Config Command ==========
+-- ========== Edit Zshrc ==========
+vim.api.nvim_create_user_command('EditZshrc', function()
+  local zshrc_path = vim.fn.expand '~/.zshrc'
+  vim.cmd('edit ' .. zshrc_path)
+end, { desc = 'Edit ~/.zshrc' })
+-- ========== end ==========
+
+-- ========== Edit Aws Config ==========
+vim.api.nvim_create_user_command('EditAwsConfig', function()
+  local aws_config_path = vim.fn.expand '~/.aws/config'
+  vim.cmd('edit ' .. aws_config_path)
+end, { desc = 'Edit ~/.aws/config' })
+-- ========== end ==========
+
+--[[ ========== Edit Tmux Config Command ==========
+vim.api.nvim_create_user_command('EditTmuxConfig', function()
+  local tmux_config_path = vim.fn.expand '~/.config/tmux/tmux.conf'
+  vim.cmd('edit ' .. vim.fn.fnameescape(tmux_config_path))
+end, { desc = 'Edit Tmux configuration at ~/.config/tmux/tmux.conf' })
+-- ========== end ==========]]
+
+--[[ ========== Edit WezTerm Config Command ==========
 vim.api.nvim_create_user_command('EditWeztermConfig', function()
   local wezterm_config_path = vim.fn.expand '~/.config/wezterm/wezterm.lua'
   vim.cmd('edit ' .. vim.fn.fnameescape(wezterm_config_path))
 end, { desc = 'Edit WezTerm configuration' })
--- ========== end ==========
+-- ========== end ==========]]
 
 -- ========== DevContainerUp Command ==========
 vim.api.nvim_create_user_command('DevContainerUp', function()
@@ -1455,6 +1575,42 @@ vim.keymap.set('n', '<leader>x', function()
   vim.bo.bufhidden = 'wipe'
   vim.bo.swapfile = false
 end, { desc = 'Open scratch buffer' })
+-- ========== end ==========
+
+-- ========== Git stash debug helpers ==========
+
+-- stash dev debug configuration
+vim.api.nvim_create_user_command('StashDebugDev', function()
+  vim.cmd 'Git stash push --staged --message "worfklow:debug-dev"'
+end, {
+  desc = 'Push currently staged changes to the "dev-debug" stash',
+})
+
+-- stash qat debug configuration
+vim.api.nvim_create_user_command('StashDebugQat', function()
+  vim.cmd 'Git stash push --staged --message "worfklow:debug-qat"'
+end, {
+  desc = 'Push currently staged changes to the "worfklow:debug-qat" stash',
+})
+
+-- stash stg debug configuration
+vim.api.nvim_create_user_command('StashDebugStg', function()
+  vim.cmd 'Git stash push --staged --message "worfklow:debug-stg"'
+end, {
+  desc = 'Push currently staged changes to the "worfklow:debug-stg" stash',
+})
+
+-- ========== end ==========
+
+-- ========== Git stash debug helpers ==========
+
+-- stash stg debug configuration
+vim.api.nvim_create_user_command('GSyncMain', function()
+  vim.cmd 'Git fetch origin main:main'
+end, {
+  desc = 'Push currently staged changes to the "worfklow:debug-stg" stash',
+})
+
 -- ========== end ==========
 
 -- The line beneath this is called `modeline`. See `:help modeline`

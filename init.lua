@@ -1215,6 +1215,7 @@ require('lazy').setup({
       treesitter.setup {}
 
       local ensure_installed = {
+        'java',
         'scala',
         'perl',
         'bash',

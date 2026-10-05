@@ -1251,7 +1251,15 @@ require('lazy').setup({
           end
 
           -- `vim.treesitter.start()` is Neovim's built-in highlighter. Ignore
-          -- filetypes without an installed parser and retain their Vim syntax.
+          -- filetypes without an installed parser or highlights query and
+          -- retain their Vim syntax.
+          local lang = vim.treesitter.language.get_lang(filetype) or filetype
+          local has_query = pcall(function()
+            assert(vim.treesitter.query.get(lang, 'highlights'))
+          end)
+          if not has_query then
+            return
+          end
           local started = pcall(vim.treesitter.start, event.buf)
           if started and filetype ~= 'ruby' then
             vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"

@@ -13,7 +13,6 @@ return {
   config = function()
     -- local project_actions  = require("telescope._extensions.project.actions")
     local base_dirs = {
-      '~/IdeaProjects', -- scan all repos here
       '~/dev', -- scan all repos here
       -- '~/tmp', -- scan all repos here
       '~/.config', -- scan all repos here
@@ -27,6 +26,8 @@ return {
       end
     end
 
+    local project_actions = require 'telescope._extensions.project.actions'
+
     -- 1) configure the extension
     require('telescope').setup {
       extensions = {
@@ -38,6 +39,14 @@ return {
           search_by = { 'title', 'path' },
           sync_with_nvim_tree = true, -- keep nvim-tree in sync
           cd_scope = { 'tab' },
+          mappings = {
+            i = {
+              ['<M-d>'] = project_actions.delete_project,
+            },
+            n = {
+              ['d'] = project_actions.delete_project,
+            },
+          },
           --[[ on_project_selected = function(prompt_bufnr)
               -- this will :cd into the project root
               project_actions.change_working_directory(prompt_bufnr, false)

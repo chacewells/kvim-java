@@ -601,7 +601,20 @@ require('lazy').setup({
       end, { noremap = true, silent = true, desc = '[S]earch [V]isual Selection' })
     end,
   },
-
+  {
+    'Bekaboo/dropbar.nvim',
+    -- optional, but required for fuzzy finder support
+    dependencies = {
+      'nvim-telescope/telescope-fzf-native.nvim',
+      build = 'make',
+    },
+    config = function()
+      local dropbar_api = require 'dropbar.api'
+      vim.keymap.set('n', '<Leader>;', dropbar_api.pick, { desc = 'Pick symbols in winbar' })
+      vim.keymap.set('n', '[;', dropbar_api.goto_context_start, { desc = 'Go to start of current context' })
+      vim.keymap.set('n', '];', dropbar_api.select_next_context, { desc = 'Select next context' })
+    end,
+  },
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -967,6 +980,7 @@ require('lazy').setup({
         groovy = { 'npm-groovy-lint' },
         html = { 'prettierd' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        java = { 'google-java-format' },
         lua = { 'stylua' },
         markdown = { 'prettierd' },
         perl = { 'perltidy' },
@@ -1617,6 +1631,18 @@ vim.api.nvim_create_user_command('GSyncMain', function()
   vim.cmd 'Git fetch origin main:main'
 end, {
   desc = 'Push currently staged changes to the "worfklow:debug-stg" stash',
+})
+
+-- ========== end ==========
+
+-- ========== Open reading list location ==========
+
+-- stash stg debug configuration
+vim.api.nvim_create_user_command('EditLinks', function()
+  local file_location = vim.fn.expand '~/links.txt'
+  vim.cmd('edit ' .. file_location)
+end, {
+  desc = 'Edit the global links file at ~/links.txt',
 })
 
 -- ========== end ==========

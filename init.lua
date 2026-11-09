@@ -170,6 +170,7 @@ vim.o.confirm = true
 vim.filetype.add {
   pattern = {
     ['.*Jenkinsfile'] = 'groovy',
+    ['.*dql'] = 'kotlin',
   },
 }
 
@@ -502,6 +503,15 @@ require('lazy').setup({
         --  All the info you're looking for is in `:help telescope.setup()`
         --
         defaults = {
+          file_ignore_patterns = {
+            'node_modules/',
+            '%.git/',
+            '%.class$',
+            '%.log$',
+            -- 'build/',
+            'dist/',
+            'tags',
+          },
           preview = {
             -- Neovim 0.12.3 can trip the built-in Treesitter highlighter on
             -- markdown injections in Telescope preview buffers.
@@ -515,8 +525,8 @@ require('lazy').setup({
             '--line-number',
             '--column',
             '--smart-case',
-            '--no-ignore',
-            -- '--hidden',
+            '--no-ignore-exclude',
+            '--hidden',
           },
           --   mappings = {
           --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
@@ -525,7 +535,7 @@ require('lazy').setup({
         pickers = {
           find_files = {
             hidden = false,
-            no_ignore = false,
+            no_ignore = true,
           },
         },
         extensions = {
@@ -941,7 +951,10 @@ require('lazy').setup({
       }
     end,
   },
-  { 'mfussenegger/nvim-jdtls' },
+  {
+    'mfussenegger/nvim-jdtls',
+    enabled = true,
+  },
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },

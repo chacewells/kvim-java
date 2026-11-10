@@ -1,9 +1,11 @@
 local M = {}
 
 function M:setup()
+  local os_platform = vim.fn.has 'linux' == 1 and 'linux' or 'macos'
   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
   local workspace_dir = vim.fn.stdpath 'data' .. '/workspaces/' .. project_name -- todo get workspace data directory
-  local java = vim.fn.expand '~/.sdkman/candidates/java/25.0.1-tem/bin/java'
+  local java = os_platform == 'linux' and vim.fn.expand '~/.sdkman/candidates/java/25.0.1-tem/bin/java'
+    or vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem/bin/java'
   local lombok = vim.fn.stdpath 'data' .. '/mason/packages/jdtls/lombok.jar'
   local launcher_jar = vim.fn.expand(vim.fn.stdpath 'data' .. '/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar')
   local config_name = vim.fn.has 'linux' == 1 and 'config_linux_arm' or 'config_mac_arm'
@@ -62,9 +64,9 @@ function M:setup()
             enabled = true,
             wrapper = {
               enabled = true,
-              checksums = {
+              --[[checksums = {
                 { sha256 = '3b8a25775a69158b5ad2b1d17a80a88dc7b40a352a73eb27d06c612a7ce68e98', allowed = true },
-              },
+              },]]
             },
             version = nil, -- use wrapper version
             home = nil, -- use wrapper

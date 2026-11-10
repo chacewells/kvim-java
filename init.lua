@@ -975,7 +975,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true, java = true }
+        local disable_filetypes = { c = true, cpp = true, java = true, groovy = true }
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -990,7 +990,7 @@ require('lazy').setup({
         -- Conform can also run multiple formatters sequentially
         -- You can use 'stop_after_first' to run the first available formatter from the list
         graphql = { 'prettierd' },
-        groovy = { 'npm-groovy-lint' },
+        -- groovy = { 'npm-groovy-lint' },
         html = { 'prettierd' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         java = { 'google-java-format' },

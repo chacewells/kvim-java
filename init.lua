@@ -490,20 +490,20 @@ require('lazy').setup({
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
+      local search_ignore_patterns = {
+        'node_modules/',
+        '%.git/',
+        '%.class$',
+        '%.log$',
+        -- 'build/',
+        'dist/',
+        'tags',
+      }
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
         defaults = {
-          file_ignore_patterns = {
-            'node_modules/',
-            '%.git/',
-            '%.class$',
-            '%.log$',
-            -- 'build/',
-            'dist/',
-            'tags',
-          },
           preview = {
             -- Neovim 0.12.3 can trip the built-in Treesitter highlighter on
             -- markdown injections in Telescope preview buffers.
@@ -528,6 +528,10 @@ require('lazy').setup({
           find_files = {
             hidden = false,
             no_ignore = true,
+            file_ignore_patterns = search_ignore_patterns,
+          },
+          live_grep = {
+            file_ignore_patterns = search_ignore_patterns,
           },
         },
         extensions = {

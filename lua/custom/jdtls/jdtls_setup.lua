@@ -4,8 +4,8 @@ function M:setup()
   local os_platform = vim.fn.has 'linux' == 1 and 'linux' or 'macos'
   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
   local workspace_dir = vim.fn.stdpath 'data' .. '/workspaces/' .. project_name -- todo get workspace data directory
-  local java = os_platform == 'linux' and vim.fn.expand '~/.sdkman/candidates/java/25.0.1-tem/bin/java'
-    or vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem/bin/java'
+  local java_home = os_platform == 'linux' and '~/.sdkman/candidates/java/25.0.1-tem' or vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem'
+  local java = java_home .. '/bin/java'
   local lombok = vim.fn.stdpath 'data' .. '/mason/packages/jdtls/lombok.jar'
   local launcher_jar = vim.fn.expand(vim.fn.stdpath 'data' .. '/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar')
   local config_name = vim.fn.has 'linux' == 1 and 'config_linux_arm' or 'config_mac_arm'
@@ -71,7 +71,7 @@ function M:setup()
             version = nil, -- use wrapper version
             home = nil, -- use wrapper
             java = {
-              home = vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem', -- Force Java 21 for Gradle to prevent daemon splitting
+              home = java_home,
             },
             -- Let Gradle handle annotation processing and code generation
             annotationProcessing = {

@@ -93,6 +93,17 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+-- [[ Bootstrap file paths ]]
+-- Open with :edit $ZSHRC_PATH; press <Tab> to complete variable names.
+vim.env.GRADLE_CONFIG_PATH = vim.fn.expand '~/.gradle/gradle.properties'
+vim.env.TMUX_CONFIG_PATH = vim.fn.expand '~/.tmux.conf'
+vim.env.ZSHRC_PATH = vim.fn.expand '~/.zshrc'
+vim.env.AWS_CONFIG_PATH = vim.fn.expand '~/.aws/config'
+vim.env.LINKS_PATH = vim.fn.expand '~/links.txt'
+vim.env.CODEX_AGENTS_PATH = vim.fn.expand '~/.codex/AGENTS.md'
+-- vim.env.TMUX_CONFIG_PATH = vim.fn.expand '~/.config/tmux/tmux.conf'
+-- vim.env.WEZTERM_CONFIG_PATH = vim.fn.expand '~/.config/wezterm/wezterm.lua'
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -1490,48 +1501,6 @@ vim.api.nvim_create_user_command('GitExclude', function()
 end, { desc = 'Open .git/info/exclude file for editing' })
 -- ========== end ==========
 
--- ========== Edit Global Gradle Command ==========
-vim.api.nvim_create_user_command('EditGlobalGradle', function()
-  local gradle_config_path = vim.fn.expand '~/.gradle/gradle.properties'
-  vim.cmd('edit ' .. gradle_config_path)
-end, { desc = 'Edit global gradle configuration at ~/.gradle/gradle.properties' })
--- ========== end ==========
-
--- ========== Edit Tmux Config Command ==========
-vim.api.nvim_create_user_command('EditTmuxConfig', function()
-  local tmux_config_path = vim.fn.expand '~/.tmux.conf'
-  vim.cmd('edit ' .. vim.fn.fnameescape(tmux_config_path))
-end, { desc = 'Edit Tmux configuration at ~/.tmux.conf' })
--- ========== end ==========
-
--- ========== Edit Zshrc ==========
-vim.api.nvim_create_user_command('EditZshrc', function()
-  local zshrc_path = vim.fn.expand '~/.zshrc'
-  vim.cmd('edit ' .. zshrc_path)
-end, { desc = 'Edit ~/.zshrc' })
--- ========== end ==========
-
--- ========== Edit Aws Config ==========
-vim.api.nvim_create_user_command('EditAwsConfig', function()
-  local aws_config_path = vim.fn.expand '~/.aws/config'
-  vim.cmd('edit ' .. aws_config_path)
-end, { desc = 'Edit ~/.aws/config' })
--- ========== end ==========
-
---[[ ========== Edit Tmux Config Command ==========
-vim.api.nvim_create_user_command('EditTmuxConfig', function()
-  local tmux_config_path = vim.fn.expand '~/.config/tmux/tmux.conf'
-  vim.cmd('edit ' .. vim.fn.fnameescape(tmux_config_path))
-end, { desc = 'Edit Tmux configuration at ~/.config/tmux/tmux.conf' })
--- ========== end ==========]]
-
---[[ ========== Edit WezTerm Config Command ==========
-vim.api.nvim_create_user_command('EditWeztermConfig', function()
-  local wezterm_config_path = vim.fn.expand '~/.config/wezterm/wezterm.lua'
-  vim.cmd('edit ' .. vim.fn.fnameescape(wezterm_config_path))
-end, { desc = 'Edit WezTerm configuration' })
--- ========== end ==========]]
-
 -- ========== DevContainerUp Command ==========
 vim.api.nvim_create_user_command('DevContainerUp', function()
   vim.cmd '!devcontainer up'
@@ -1641,18 +1610,6 @@ vim.api.nvim_create_user_command('GSyncMain', function()
   vim.cmd 'Git fetch origin main:main'
 end, {
   desc = 'Push currently staged changes to the "worfklow:debug-stg" stash',
-})
-
--- ========== end ==========
-
--- ========== Open reading list location ==========
-
--- stash stg debug configuration
-vim.api.nvim_create_user_command('EditLinks', function()
-  local file_location = vim.fn.expand '~/links.txt'
-  vim.cmd('edit ' .. file_location)
-end, {
-  desc = 'Edit the global links file at ~/links.txt',
 })
 
 -- ========== end ==========

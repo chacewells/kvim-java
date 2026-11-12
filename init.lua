@@ -321,14 +321,6 @@ require('lazy').setup({
     },
   }, ]]
   {
-    'phelipetls/jsonpath.nvim',
-    dependencies = { 'nvim-treesitter/nvim-treesitter' },
-  },
-  {
-    'Einenlum/yaml-revealer',
-    ft = { 'yaml' },
-  },
-  {
     'stevearc/oil.nvim',
     ---@module 'oil'
     ---@type oil.SetupOpts

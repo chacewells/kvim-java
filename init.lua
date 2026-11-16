@@ -996,7 +996,7 @@ require('lazy').setup({
       formatters_by_ft = {
         -- Conform can also run multiple formatters sequentially
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        graphql = { 'prettierd' },
+        -- graphql = { 'prettierd' },
         -- groovy = { 'npm-groovy-lint' },
         html = { 'prettierd' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },

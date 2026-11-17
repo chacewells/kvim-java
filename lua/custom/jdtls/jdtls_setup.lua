@@ -4,8 +4,15 @@ function M:setup()
   local os_platform = vim.fn.has 'linux' == 1 and 'linux' or 'macos'
   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
   local workspace_dir = vim.fn.stdpath 'data' .. '/workspaces/' .. project_name -- todo get workspace data directory
-  local java_home = os_platform == 'linux' and '~/.sdkman/candidates/java/25.0.1-tem' or vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem'
-  local java = java_home .. '/bin/java'
+
+  -- java home locations
+  local java17_home = vim.fn.expand '~/.sdkman/candidates/java/17.0.12-tem'
+  local java21_home = vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem'
+  local java25_home = os_platform == 'linux' and vim.fn.expand '~/.sdkman/candidates/java/25.0.1-tem'
+    or '/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home'
+  local java_home = java25_home
+  local java_bin = java_home .. '/bin/java'
+
   local lombok = vim.fn.stdpath 'data' .. '/mason/packages/jdtls/lombok.jar'
   local launcher_jar = vim.fn.expand(vim.fn.stdpath 'data' .. '/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar')
   local config_name = vim.fn.has 'linux' == 1 and 'config_linux_arm' or 'config_mac_arm'
@@ -14,7 +21,7 @@ function M:setup()
   -- local gradle_java_home = project_name == 'order-a' and '/Users/awells10/.sdkman/candidates/java/11.0.29-tem' or nil
   local config = {
     cmd = {
-      java, -- path to java 21
+      java_bin, -- path to java 21
       '-Declipse.application=org.eclipse.jdt.ls.core.id1',
       '-Dosgi.bundles.defaultStartLevel=4',
       '-Declipse.product=org.eclipse.jdt.ls.core.product',
@@ -45,16 +52,16 @@ function M:setup()
         configuration = {
           runtimes = {
             {
+              name = 'JavaSE-25',
+              path = java25_home,
+            },
+            {
               name = 'JavaSE-21',
-              path = vim.fn.expand '~/.sdkman/candidates/java/21.0.7-tem',
+              path = java21_home,
             },
             {
               name = 'JavaSE-17',
-              path = vim.fn.expand '~/.sdkman/candidates/java/17.0.12-tem',
-            },
-            {
-              name = 'JavaSE-11',
-              path = vim.fn.expand '~/.sdkman/candidates/java/11.0.29-tem',
+              path = java17_home,
             },
           },
         },
